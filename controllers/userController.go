@@ -61,7 +61,7 @@ func Signup() gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "error occured while checking for the email"})
 		}
 		if count > 0 {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "this email or phone number already exists"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "this email already exists"})
 		}
 
 		password := HashPassword(*user.Password)
@@ -100,7 +100,7 @@ func Login() gin.HandlerFunc {
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 		var user models.User
 		var foundUser models.User
-		defer cancel()
+		//defer cancel()
 		if err := c.BindJSON(&user); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
@@ -123,7 +123,7 @@ func Login() gin.HandlerFunc {
 		}
 		token, refreshToken, _ := helpers.GenerateAllTokens(*foundUser.Email, *foundUser.FirstName, *foundUser.LastName, *foundUser.UserType, foundUser.UserID)
 		helpers.UpdateAllTokens(token, refreshToken, foundUser.UserID)
-		userCollection.FindOne(ctx, bson.M{"user_id": foundUser.UserID}).Decode(&foundUser)
+		err = userCollection.FindOne(ctx, bson.M{"user_id": foundUser.UserID}).Decode(&foundUser)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return

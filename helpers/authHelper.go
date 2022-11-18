@@ -11,7 +11,6 @@ func CheckUserType(c *gin.Context, role string) (err error) {
 	err = nil
 	if userType != role {
 		err = errors.New("unauthorized to access this resource")
-		return err
 	}
 	return err
 }
